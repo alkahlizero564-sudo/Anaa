@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <title>Anaa — اعثر على هاتفك</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- ===== تسجيل الدخول ===== -->
+  <section id="auth-view" class="view" hidden>
+    <div class="auth-card">
+      <div class="brand">
+        <img src="/icon.svg" alt="" width="56" height="56">
+        <h1>Anaa</h1>
+        <p>اعثر على هاتفك المفقود: موقعه، بطاريته، وحالته على الخريطة.</p>
+      </div>
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-auth-tab="login" role="tab">تسجيل الدخول</button>
+        <button class="tab" data-auth-tab="register" role="tab">حساب جديد</button>
+      </div>
+      <form id="auth-form" novalidate>
+        <label>البريد الإلكتروني
+          <input type="email" name="email" autocomplete="email" required dir="ltr">
+        </label>
+        <label>كلمة المرور
+          <input type="password" name="password" autocomplete="current-password" minlength="8" required dir="ltr">
+        </label>
+        <p class="error" id="auth-error" role="alert"></p>
+        <button type="submit" class="btn primary" id="auth-submit">دخول</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== التطبيق ===== -->
+  <section id="main-view" class="view" hidden>
+    <header class="topbar">
+      <div class="topbar-brand"><img src="/icon.svg" alt="" width="28" height="28"> <strong>Anaa</strong></div>
+      <nav class="tabs">
+        <button class="tab active" data-tab="dashboard">أجهزتي</button>
+        <button class="tab" data-tab="this-device">هذا الجهاز</button>
+      </nav>
+      <div class="topbar-user">
+        <span id="user-email" dir="ltr"></span>
+        <button class="btn ghost small" id="logout-btn">خروج</button>
+      </div>
+    </header>
+
+    <!-- لوحة الأجهزة -->
+    <div id="dashboard" class="panel">
+      <aside class="sidebar">
+        <div class="sidebar-head">
+          <h2>أجهزتي</h2>
+          <button class="btn ghost small" id="refresh-btn" title="تحديث">↻ تحديث</button>
+        </div>
+        <ul id="device-list" class="device-list"></ul>
+        <div id="empty-devices" class="empty" hidden>
+          <p>لا توجد أجهزة بعد.</p>
+          <p>افتح هذا الموقع على هاتفك، سجّل الدخول بنفس البريد، ثم اختر <b>«هذا الجهاز»</b> وفعّل المشاركة.</p>
+        </div>
+        <div id="device-detail" class="detail" hidden></div>
+      </aside>
+      <div id="map" class="map" aria-label="الخريطة"></div>
+    </div>
+
+    <!-- وضع التتبع على هذا الجهاز -->
+    <div id="this-device" class="panel single" hidden>
+      <div id="enroll" class="card">
+        <h2>تفعيل العثور على هذا الجهاز</h2>
+        <p>عند التفعيل، يرسل هذا الجهاز موقعه ونسبة البطارية وحالته إلى حسابك، لتراه من أي جهاز آخر.</p>
+        <form id="enroll-form">
+          <label>اسم الجهاز
+            <input name="name" maxlength="60" placeholder="مثال: هاتف أحمد" required>
+          </label>
+          <label class="check">
+            <input type="checkbox" name="consent" required>
+            <span>هذا جهازي (أو لدي إذن صاحبه)، وأوافق على مشاركة موقعه مع حسابي.</span>
+          </label>
+          <p class="error" id="enroll-error" role="alert"></p>
+          <button class="btn primary" type="submit">تفعيل المشاركة</button>
+        </form>
+      </div>
+
+      <div id="tracking" class="card" hidden>
+        <div class="live-banner"><span class="pulse"></span> هذا الجهاز يشارك موقعه الآن مع حسابك</div>
+        <h2 id="tracking-name"></h2>
+        <dl class="stats">
+          <div><dt>آخر إرسال</dt><dd id="t-last">—</dd></div>
+          <div><dt>الموقع</dt><dd id="t-loc" dir="ltr">—</dd></div>
+          <div><dt>البطارية</dt><dd id="t-batt">—</dd></div>
+          <div><dt>الشبكة</dt><dd id="t-net">—</dd></div>
+        </dl>
+        <label class="check">
+          <input type="checkbox" id="wake-toggle">
+          <span>إبقاء الشاشة مضاءة (يساعد على استمرار الإرسال)</span>
+        </label>
+        <p class="hint">ملاحظة: المتصفح يرسل الموقع ما دامت الصفحة مفتوحة. للحصول على أفضل نتيجة ثبّت التطبيق على الشاشة الرئيسية واتركه مفتوحًا.</p>
+        <div class="row">
+          <button class="btn primary" id="send-now">إرسال الآن</button>
+          <button class="btn danger ghost" id="stop-sharing">إيقاف المشاركة</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- رنين -->
+  <div id="ring-overlay" class="overlay ring" hidden>
+    <div class="overlay-box">
+      <div class="big-icon">🔔</div>
+      <h2>صاحب الجهاز يبحث عنه!</h2>
+      <button class="btn primary large" id="stop-ring">إيقاف الرنين</button>
+    </div>
+  </div>
+
+  <!-- وضع الفقدان -->
+  <div id="lost-overlay" class="overlay lost" hidden>
+    <div class="overlay-box">
+      <div class="big-icon">📱</div>
+      <h2>هذا الهاتف مفقود</h2>
+      <p id="lost-message"></p>
+      <a id="lost-contact" class="btn primary large" hidden></a>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <script src="/vendor/leaflet/leaflet.js"></script>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
