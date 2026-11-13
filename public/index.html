@@ -14,6 +14,19 @@
   <!-- ===== تسجيل الدخول ===== -->
   <section id="auth-view" class="view" hidden>
     <div class="auth-card">
+      <div class="find-now">
+        <h2>📱 هاتفك ضايع دلوقتي؟</h2>
+        <p>لو الهاتف مسجّل عليه حساب جوجل، اضغط الزر واختار حسابك، وجوجل هيحدد مكانه على الخريطة ونسبة البطارية ويخليك تشغّل رنين أو تقفله.</p>
+        <a class="btn google large" target="_blank" rel="noopener"
+           href="https://accounts.google.com/AccountChooser?continue=https%3A%2F%2Fwww.google.com%2Fandroid%2Ffind">
+          <img src="/google.svg" alt="" width="22" height="22"> ابحث عن هاتفي بحساب جوجل
+        </a>
+        <div class="other-finders">
+          <a target="_blank" rel="noopener" href="https://www.icloud.com/find">آيفون (iCloud)</a>
+          <a target="_blank" rel="noopener" href="https://smartthingsfind.samsung.com/">سامسونج</a>
+          <a target="_blank" rel="noopener" href="https://findphone.huawei.com/">هواوي</a>
+        </div>
+      </div>
       <div class="brand">
         <img src="/icon.svg" alt="" width="56" height="56">
         <h1>Anaa</h1>
@@ -33,6 +46,10 @@
         <p class="error" id="auth-error" role="alert"></p>
         <button type="submit" class="btn primary" id="auth-submit">دخول</button>
       </form>
+      <div id="google-signin-wrap" hidden>
+        <div class="or"><span>أو</span></div>
+        <div id="google-signin"></div>
+      </div>
     </div>
   </section>
 
@@ -61,6 +78,8 @@
         <div id="empty-devices" class="empty" hidden>
           <p>لا توجد أجهزة بعد.</p>
           <p>افتح هذا الموقع على هاتفك، سجّل الدخول بنفس البريد، ثم اختر <b>«هذا الجهاز»</b> وفعّل المشاركة.</p>
+          <p>هاتفك ضايع ولم يكن مفعّلًا هنا؟
+            <a target="_blank" rel="noopener" href="https://accounts.google.com/AccountChooser?continue=https%3A%2F%2Fwww.google.com%2Fandroid%2Ffind">ابحث عنه بحساب جوجل</a></p>
         </div>
         <div id="device-detail" class="detail" hidden></div>
       </aside>

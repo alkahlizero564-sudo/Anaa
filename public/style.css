@@ -87,6 +87,21 @@ label.check input { margin-top: .35rem; width: 1.1rem; height: 1.1rem; flex: non
 .auth-card .tab { flex: 1; }
 #auth-form .btn { width: 100%; }
 
+/* ---------- lost phone now ---------- */
+.find-now {
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 30%, transparent);
+  border-radius: 12px; padding: 1rem; margin-bottom: 1.4rem; text-align: center;
+}
+.find-now h2 { font-size: 1.15rem; }
+.find-now p { color: var(--muted); font-size: .9rem; margin: 0 0 .8rem; }
+.btn.google { width: 100%; background: #fff; color: #1f1f1f; border-color: #dadce0; }
+.other-finders { display: flex; justify-content: center; gap: 1rem; margin-top: .7rem; font-size: .85rem; flex-wrap: wrap; }
+.other-finders a, .empty a { color: var(--primary); }
+.or { display: flex; align-items: center; gap: .6rem; color: var(--muted); margin: 1rem 0; font-size: .85rem; }
+.or::before, .or::after { content: ""; flex: 1; border-top: 1px solid var(--border); }
+#google-signin { display: flex; justify-content: center; }
+
 /* ---------- main layout ---------- */
 #main-view:not([hidden]) { display: flex; flex-direction: column; height: 100%; }
 .topbar {

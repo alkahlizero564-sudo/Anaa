@@ -11,6 +11,9 @@
 - 📍 طلب موقع فوري، و🧭 الاتجاهات إلى الجهاز عبر خرائط جوجل.
 - عدة أجهزة لكل حساب، وإعادة التسمية والحذف.
 
+## هاتفك ضايع ولم يكن مفعّلًا في Anaa؟
+في صفحة الدخول زر **«ابحث عن هاتفي بحساب جوجل»**: يفتح قائمة حسابات جوجل، تختار الحساب المسجّل على الهاتف المفقود، فتعرض لك خدمة جوجل الرسمية (Find Hub) موقعه والبطارية، وتتيح الرنين والقفل والمسح. وفيه روابط مماثلة لآيفون وسامسونج وهواوي.
+
 ## الخصوصية والموافقة
 - لا يمكن تتبع أي هاتف إلا بعد تسجيل الدخول **على الهاتف نفسه** والموافقة الصريحة على المشاركة.
 - يظهر على الهاتف شريط واضح «هذا الجهاز يشارك موقعه الآن»، ويمكن إيقاف المشاركة منه في أي وقت.
@@ -23,7 +26,12 @@
 npm start          # http://localhost:3000
 npm test           # اختبارات الـ API
 ```
-متغيرات اختيارية: `PORT`، `DB_FILE` (الافتراضي `data/anaa.db`).
+متغيرات اختيارية: `PORT`، `DB_FILE` (الافتراضي `data/anaa.db`)، `GOOGLE_CLIENT_ID`.
+
+### تفعيل «تسجيل الدخول عبر جوجل» في التطبيق
+1. من [Google Cloud Console](https://console.cloud.google.com/apis/credentials) أنشئ **OAuth client ID** من نوع *Web application*.
+2. أضف عنوان موقعك (مثل `https://example.com`) في **Authorized JavaScript origins**.
+3. شغّل الخادم: `GOOGLE_CLIENT_ID=xxxx.apps.googleusercontent.com npm start`، فيظهر زر جوجل في صفحة الدخول.
 
 > ⚠️ تحديد الموقع في المتصفح يتطلب **HTTPS** على الهاتف. عند النشر ضع التطبيق خلف HTTPS (مثل Caddy أو Nginx أو أي استضافة تدعمه).
 
@@ -47,6 +55,7 @@ test/            اختبارات node:test
 ### الـ API
 | | المسار | الوصف |
 |---|---|---|
+| POST | `/api/auth/google` | `{credential}` من Google Identity Services ← `{token}` |
 | POST | `/api/auth/register`, `/api/auth/login` | `{email, password}` ← `{token}` |
 | GET | `/api/devices` | أجهزة المستخدم مع آخر حالة وموقع |
 | POST | `/api/devices` | `{name, consent: true}` ← `{deviceToken}` |

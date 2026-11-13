@@ -100,7 +100,17 @@ function rateLimiter(limit, windowMs) {
 }
 
 // ---------- app ----------
-export function createApp({ db, publicDir }) {
+// Verifies a Google ID token (from "Sign in with Google") using Google's tokeninfo endpoint.
+async function verifyGoogleIdToken(credential, clientId) {
+  const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+  if (!res.ok) return null;
+  const info = await res.json();
+  const issOk = info.iss === 'accounts.google.com' || info.iss === 'https://accounts.google.com';
+  if (!issOk || info.aud !== clientId || Number(info.exp) * 1000 < Date.now()) return null;
+  return { email: info.email, emailVerified: info.email_verified === true || info.email_verified === 'true' };
+}
+
+export function createApp({ db, publicDir, googleClientId = null, verifyGoogle = verifyGoogleIdToken }) {
   const authLimit = rateLimiter(20, 15 * 60 * 1000);
 
   const q = {
@@ -209,6 +219,24 @@ export function createApp({ db, publicDir }) {
       const user = q.userByEmail.get(e);
       if (!user || typeof password !== 'string' || !verifyPassword(password, user.password_hash)) {
         throw new HttpError(401, 'البريد الإلكتروني أو كلمة المرور غير صحيحة');
+      }
+      return [200, { token: startSession(user.id), user: { id: user.id, email: user.email } }];
+    }],
+
+    ['GET', /^\/api\/config$/, async () => [200, { googleClientId }]],
+
+    ['POST', /^\/api\/auth\/google$/, async (req) => {
+      if (!googleClientId) throw new HttpError(404, 'تسجيل الدخول عبر جوجل غير مفعّل على هذا الخادم');
+      const { credential } = await readJson(req);
+      if (typeof credential !== 'string' || !credential) throw new HttpError(400, 'بيانات جوجل ناقصة');
+      const info = await verifyGoogle(credential, googleClientId);
+      if (!info || !info.emailVerified || !info.email) throw new HttpError(401, 'تعذّر التحقق من حساب جوجل');
+      const email = info.email.toLowerCase();
+      let user = q.userByEmail.get(email);
+      if (!user) {
+        // حساب جوجل بدون كلمة مرور محلية ("google" لا يطابق أي كلمة مرور)
+        const { lastInsertRowid } = q.insertUser.run(email, 'google', Date.now());
+        user = { id: Number(lastInsertRowid), email };
       }
       return [200, { token: startSession(user.id), user: { id: user.id, email: user.email } }];
     }],

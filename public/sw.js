@@ -1,6 +1,6 @@
 // يخزّن واجهة التطبيق لتفتح بسرعة حتى مع اتصال ضعيف. طلبات /api لا تُخزَّن أبدًا.
-const CACHE = 'anaa-v1';
-const SHELL = ['/', '/index.html', '/style.css', '/app.js', '/icon.svg', '/manifest.webmanifest',
+const CACHE = 'anaa-v2';
+const SHELL = ['/', '/index.html', '/style.css', '/app.js', '/icon.svg', '/google.svg', '/manifest.webmanifest',
   '/vendor/leaflet/leaflet.js', '/vendor/leaflet/leaflet.css'];
 
 self.addEventListener('install', (e) => {

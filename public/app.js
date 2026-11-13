@@ -79,6 +79,7 @@ let currentUser = null;
 
 async function boot() {
   registerServiceWorker();
+  setupGoogleSignIn();
   const token = store.get('sessionToken');
   if (token) {
     try {
@@ -134,6 +135,34 @@ $('#auth-form').addEventListener('submit', async (e) => {
     btn.disabled = false;
   }
 });
+
+// ---- تسجيل الدخول عبر جوجل (يظهر فقط إذا ضُبط GOOGLE_CLIENT_ID على الخادم) ----
+async function setupGoogleSignIn() {
+  let googleClientId;
+  try { ({ googleClientId } = await api('/api/config', { token: null })); } catch { return; }
+  if (!googleClientId) return;
+  const script = document.createElement('script');
+  script.src = 'https://accounts.google.com/gsi/client';
+  script.async = true;
+  script.onload = () => {
+    google.accounts.id.initialize({
+      client_id: googleClientId,
+      callback: async ({ credential }) => {
+        $('#auth-error').textContent = '';
+        try {
+          const { token, user } = await api('/api/auth/google', { method: 'POST', body: { credential }, token: null });
+          store.set('sessionToken', token);
+          enterApp(user);
+        } catch (err) {
+          $('#auth-error').textContent = err.message;
+        }
+      },
+    });
+    google.accounts.id.renderButton($('#google-signin'), { theme: 'outline', size: 'large', text: 'signin_with', locale: 'ar', width: 320 });
+    $('#google-signin-wrap').hidden = false;
+  };
+  document.head.append(script);
+}
 
 $('#logout-btn').addEventListener('click', async () => {
   try { await api('/api/auth/logout', { method: 'POST' }); } catch { /* ignore */ }
